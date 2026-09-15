@@ -53,6 +53,8 @@ function updateDigitUI() {
 }
 
 function setDigits(value) {
+  if (button.disabled) return;
+
   const nextDigits = Number(value);
 
   if (!Number.isInteger(nextDigits) || nextDigits < MIN_DIGITS || nextDigits > MAX_DIGITS) {
@@ -67,6 +69,8 @@ function setDigits(value) {
 }
 
 function openDigitPopover({ focusSelected = false } = {}) {
+  if (digitSelector.disabled) return;
+
   digitPopover.hidden = false;
   digitSelector.setAttribute("aria-expanded", "true");
 
@@ -101,7 +105,9 @@ function drawImmediately(value) {
 }
 
 function drawWithMotion(value) {
+  closeDigitPopover();
   button.disabled = true;
+  digitSelector.disabled = true;
   stage.setAttribute("aria-busy", "true");
   output.classList.add("is-rolling");
 
@@ -110,6 +116,7 @@ function drawWithMotion(value) {
     output.classList.remove("is-rolling");
     stage.removeAttribute("aria-busy");
     button.disabled = false;
+    digitSelector.disabled = false;
   }, ANIMATION_DURATION);
 }
 
