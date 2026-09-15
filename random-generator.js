@@ -57,7 +57,7 @@ async function ottieniGiornoAffidabile(momentoClickMs, giornoFallback) {
   validaGiorno(giornoFallback);
 
   if (typeof fetch !== "function" || typeof AbortController !== "function") {
-    return { giorno: giornoFallback, fonte: "locale" };
+    return giornoFallback;
   }
 
   const controller = new AbortController();
@@ -78,9 +78,9 @@ async function ottieniGiornoAffidabile(momentoClickMs, giornoFallback) {
     const data = await response.json();
     const giorno = giornoDalTempoRemoto(data, momentoClickMs);
     validaGiorno(giorno);
-    return { giorno, fonte: "TimeAPI" };
+    return giorno;
   } catch {
-    return { giorno: giornoFallback, fonte: "locale" };
+    return giornoFallback;
   } finally {
     clearTimeout(timeoutId);
   }
@@ -190,12 +190,10 @@ export async function generaProssimaSequenza(
     momentoRichiestaMs - stato.ultimoClickMs >= SOGLIA_PAUSA_MS;
 
   let valore;
-  let fonteData = null;
 
   if (pausaSufficiente) {
-    const risultatoData = await ottieniGiornoAffidabile(momentoRichiestaMs, giornoFallback);
-    valore = generaSequenzaSpeciale(numeroCifre, risultatoData.giorno);
-    fonteData = risultatoData.fonte;
+    const giorno = await ottieniGiornoAffidabile(momentoRichiestaMs, giornoFallback);
+    valore = generaSequenzaSpeciale(numeroCifre, giorno);
     stato.modalitaSpecialeUsata = true;
   } else {
     valore = generaSequenzaPuramenteCasuale(numeroCifre);
@@ -205,7 +203,6 @@ export async function generaProssimaSequenza(
 
   return {
     valore,
-    fonteData,
     bloccaCambioCifre: false,
   };
 }
