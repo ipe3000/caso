@@ -94,9 +94,13 @@ function setGeneratingState(active) {
   updateDigitAvailability();
 }
 
-function completeGeneration(momentoClickMs, giornoClick) {
+async function completeGeneration(momentoClickMs, giornoFallback) {
   try {
-    const risultato = generaProssimaSequenza(selectedDigits, momentoClickMs, giornoClick);
+    const risultato = await generaProssimaSequenza(
+      selectedDigits,
+      momentoClickMs,
+      giornoFallback,
+    );
     renderNumber(risultato.valore);
   } finally {
     setGeneratingState(false);
@@ -107,16 +111,16 @@ function draw() {
   if (isGenerating) return;
 
   const momentoClickMs = Date.now();
-  const giornoClick = new Date().getDate();
+  const giornoFallback = new Date(momentoClickMs).getDate();
   setGeneratingState(true);
 
   if (reducedMotion.matches) {
-    completeGeneration(momentoClickMs, giornoClick);
+    void completeGeneration(momentoClickMs, giornoFallback);
     return;
   }
 
   window.setTimeout(
-    () => completeGeneration(momentoClickMs, giornoClick),
+    () => void completeGeneration(momentoClickMs, giornoFallback),
     GENERATION_DELAY,
   );
 }
