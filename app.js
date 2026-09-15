@@ -1,4 +1,7 @@
-import { generaSequenzaCasuale } from "./random-generator.js";
+import {
+  generaProssimaSequenza,
+  impostaNumeroCifre,
+} from "./random-generator.js";
 
 const DEFAULT_DIGITS = 4;
 const MIN_DIGITS = 1;
@@ -16,6 +19,7 @@ const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 let selectedDigits = DEFAULT_DIGITS;
 let isGenerating = false;
+let digitSelectionLocked = false;
 
 function digitLabel(value) {
   return value === 1 ? "1 cifra" : `${value} cifre`;
@@ -52,12 +56,24 @@ function updateDigitUI() {
   });
 }
 
+function updateDigitAvailability() {
+  const disabled = isGenerating || digitSelectionLocked;
+
+  digitOptions.forEach((option) => {
+    option.disabled = disabled;
+  });
+}
+
 function setDigits(value, { focus = false } = {}) {
-  if (isGenerating) return;
+  if (isGenerating || digitSelectionLocked) return;
 
   const nextDigits = Number(value);
 
   if (!Number.isInteger(nextDigits) || nextDigits < MIN_DIGITS || nextDigits > MAX_DIGITS) {
+    return;
+  }
+
+  if (!impostaNumeroCifre(nextDigits)) {
     return;
   }
 
@@ -81,16 +97,14 @@ function setGeneratingState(active) {
     stage.removeAttribute("aria-busy");
   }
 
-  digitOptions.forEach((option) => {
-    option.disabled = active;
-  });
+  updateDigitAvailability();
 }
 
-function completeGeneration() {
+function completeGeneration(momentoClickMs) {
   try {
-    // Una singola richiesta dell'utente corrisponde a una singola estrazione.
-    const value = generaSequenzaCasuale(selectedDigits);
-    renderNumber(value);
+    const risultato = generaProssimaSequenza(selectedDigits, momentoClickMs);
+    digitSelectionLocked = risultato.bloccaCambioCifre;
+    renderNumber(risultato.valore);
   } finally {
     setGeneratingState(false);
   }
@@ -99,13 +113,15 @@ function completeGeneration() {
 function draw() {
   if (isGenerating) return;
 
+  const momentoClickMs = globalThis.performance?.now?.() ?? Date.now();
+  setGeneratingState(true);
+
   if (reducedMotion.matches) {
-    completeGeneration();
+    completeGeneration(momentoClickMs);
     return;
   }
 
-  setGeneratingState(true);
-  window.setTimeout(completeGeneration, GENERATION_DELAY);
+  window.setTimeout(() => completeGeneration(momentoClickMs), GENERATION_DELAY);
 }
 
 function moveSelection(currentIndex, direction) {
@@ -141,5 +157,7 @@ digitOptions.forEach((option, index) => {
 
 button.addEventListener("click", draw);
 
+impostaNumeroCifre(DEFAULT_DIGITS);
 updateDigitUI();
+updateDigitAvailability();
 renderPlaceholder();
