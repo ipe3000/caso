@@ -4,9 +4,7 @@ const SOGLIA_PAUSA_MS = 10_000;
 
 const stato = {
   numeroCifre: null,
-  ultimoRisultato: null,
   ultimoClickMs: null,
-  specialiRimanenti: 0,
   modalitaSpecialeUsata: false,
 };
 
@@ -16,8 +14,10 @@ function validaNumeroCifre(numeroCifre) {
   }
 }
 
-function momentoCorrenteMs() {
-  return globalThis.performance?.now?.() ?? Date.now();
+function validaGiorno(giorno) {
+  if (!Number.isInteger(giorno) || giorno < 1 || giorno > 31) {
+    throw new RangeError("Il giorno deve essere un intero compreso tra 1 e 31.");
+  }
 }
 
 /**
@@ -64,33 +64,27 @@ function generaSequenzaPuramenteCasuale(numeroCifre) {
   return String(valore).padStart(numeroCifre, "0");
 }
 
-function trasformaDeterministicamente(precedente) {
-  return [...precedente]
-    .map((carattere, indice) => {
-      const cifra = Number(carattere);
-      const variazione = indice % 2 === 0 ? 1 : -1;
-      return String((cifra + variazione + 10) % 10);
-    })
-    .join("");
+function generaSequenzaSpeciale(numeroCifre, giorno) {
+  const decine = Math.floor(giorno / 10);
+  const unita = giorno % 10;
+  const primaCifra = (decine + unita + numeroCifre) % 10;
+
+  return Array.from(
+    { length: numeroCifre },
+    (_, indice) => String((primaCifra + indice * 3) % 10),
+  ).join("");
 }
 
 /**
  * Aggiorna la lunghezza selezionata.
- *
- * Prima dell'attivazione speciale, cambiare lunghezza azzera il riferimento
- * temporale e il risultato precedente. Durante i due risultati speciali il
- * cambio di lunghezza viene rifiutato.
+ * Cambiare lunghezza prima dell'attivazione speciale azzera il riferimento
+ * temporale: la generazione successiva riparte normalmente.
  */
 export function impostaNumeroCifre(numeroCifre) {
   validaNumeroCifre(numeroCifre);
 
-  if (stato.specialiRimanenti > 0 && stato.numeroCifre !== numeroCifre) {
-    return false;
-  }
-
   if (stato.numeroCifre !== numeroCifre) {
     stato.numeroCifre = numeroCifre;
-    stato.ultimoRisultato = null;
     stato.ultimoClickMs = null;
   }
 
@@ -100,54 +94,45 @@ export function impostaNumeroCifre(numeroCifre) {
 /**
  * Restituisce la prossima sequenza.
  *
- * Dopo almeno 10 secondi senza click, una sola volta per sessione, i due
- * risultati successivi sono deterministici. Ogni cifra del risultato
- * precedente viene modificata alternando +1 e -1 con aritmetica modulo 10.
- * Il secondo risultato speciale deriva dal primo.
+ * Dopo almeno 10 secondi senza click, una sola volta per sessione, il risultato
+ * successivo e' deterministico. La prima cifra e' l'ultima cifra della somma
+ * tra le due cifre del giorno e il numero di cifre richiesto; le successive
+ * avanzano di 3, con aritmetica modulo 10.
  *
- * `momentoRichiestaMs` rappresenta il momento del click, non quello in cui
- * termina l'animazione dell'interfaccia.
+ * `momentoRichiestaMs` e `giornoCorrente` rappresentano il momento del click,
+ * non quello in cui termina l'animazione dell'interfaccia.
  */
-export function generaProssimaSequenza(numeroCifre, momentoRichiestaMs = momentoCorrenteMs()) {
+export function generaProssimaSequenza(
+  numeroCifre,
+  momentoRichiestaMs = Date.now(),
+  giornoCorrente = new Date().getDate(),
+) {
   validaNumeroCifre(numeroCifre);
+  validaGiorno(giornoCorrente);
 
   if (!Number.isFinite(momentoRichiestaMs)) {
     throw new TypeError("Il momento della richiesta deve essere un numero finito.");
   }
 
-  if (!impostaNumeroCifre(numeroCifre)) {
-    throw new Error("Non e' possibile cambiare il numero di cifre durante la sequenza speciale.");
-  }
+  impostaNumeroCifre(numeroCifre);
 
   const pausaSufficiente =
     !stato.modalitaSpecialeUsata &&
-    stato.specialiRimanenti === 0 &&
-    stato.ultimoRisultato !== null &&
     stato.ultimoClickMs !== null &&
     momentoRichiestaMs - stato.ultimoClickMs >= SOGLIA_PAUSA_MS;
 
+  const valore = pausaSufficiente
+    ? generaSequenzaSpeciale(numeroCifre, giornoCorrente)
+    : generaSequenzaPuramenteCasuale(numeroCifre);
+
   if (pausaSufficiente) {
-    stato.specialiRimanenti = 2;
+    stato.modalitaSpecialeUsata = true;
   }
 
-  let valore;
-
-  if (stato.specialiRimanenti > 0) {
-    valore = trasformaDeterministicamente(stato.ultimoRisultato);
-    stato.specialiRimanenti -= 1;
-
-    if (stato.specialiRimanenti === 0) {
-      stato.modalitaSpecialeUsata = true;
-    }
-  } else {
-    valore = generaSequenzaPuramenteCasuale(numeroCifre);
-  }
-
-  stato.ultimoRisultato = valore;
   stato.ultimoClickMs = momentoRichiestaMs;
 
   return {
     valore,
-    bloccaCambioCifre: stato.specialiRimanenti > 0,
+    bloccaCambioCifre: false,
   };
 }
