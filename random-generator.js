@@ -68,11 +68,16 @@ function generaSequenzaSpeciale(numeroCifre, giorno) {
   const decine = Math.floor(giorno / 10);
   const unita = giorno % 10;
   const primaCifra = (decine + unita + numeroCifre) % 10;
+  const cifre = [String(primaCifra)];
+  let cifraCorrente = primaCifra;
 
-  return Array.from(
-    { length: numeroCifre },
-    (_, indice) => String((primaCifra + indice * 3) % 10),
-  ).join("");
+  for (let indice = 1; indice < numeroCifre; indice += 1) {
+    const incremento = indice % 2 === 1 ? 3 : 4;
+    cifraCorrente = (cifraCorrente + incremento) % 10;
+    cifre.push(String(cifraCorrente));
+  }
+
+  return cifre.join("");
 }
 
 /**
@@ -97,7 +102,7 @@ export function impostaNumeroCifre(numeroCifre) {
  * Dopo almeno 10 secondi senza click, una sola volta per sessione, il risultato
  * successivo e' deterministico. La prima cifra e' l'ultima cifra della somma
  * tra le due cifre del giorno e il numero di cifre richiesto; le successive
- * avanzano di 3, con aritmetica modulo 10.
+ * avanzano alternando +3 e +4, con aritmetica modulo 10.
  *
  * `momentoRichiestaMs` e `giornoCorrente` rappresentano il momento del click,
  * non quello in cui termina l'animazione dell'interfaccia.
