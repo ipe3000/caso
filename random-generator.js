@@ -1,7 +1,7 @@
 const MIN_CIFRE = 1;
 const MAX_CIFRE = 8;
 const SOGLIA_PAUSA_MS = 10_000;
-const TIME_API_TIMEOUT_MS = 1_000;
+const TIME_API_TIMEOUT_MS = 500;
 const TIME_API_URL =
   "https://timeapi.io/api/Time/current/zone?timeZone=Europe%2FRome";
 
@@ -57,7 +57,7 @@ async function ottieniGiornoAffidabile(momentoClickMs, giornoFallback) {
   validaGiorno(giornoFallback);
 
   if (typeof fetch !== "function" || typeof AbortController !== "function") {
-    return giornoFallback;
+    return { giorno: giornoFallback, fonte: "locale" };
   }
 
   const controller = new AbortController();
@@ -78,9 +78,9 @@ async function ottieniGiornoAffidabile(momentoClickMs, giornoFallback) {
     const data = await response.json();
     const giorno = giornoDalTempoRemoto(data, momentoClickMs);
     validaGiorno(giorno);
-    return giorno;
+    return { giorno, fonte: "TimeAPI" };
   } catch {
-    return giornoFallback;
+    return { giorno: giornoFallback, fonte: "locale" };
   } finally {
     clearTimeout(timeoutId);
   }
@@ -167,7 +167,7 @@ export function impostaNumeroCifre(numeroCifre) {
  *
  * Dopo almeno 10 secondi senza click, una sola volta per sessione, il risultato
  * successivo e' deterministico. La data viene richiesta a TimeAPI per
- * Europe/Rome con timeout di un secondo; in caso di errore viene usato il
+ * Europe/Rome con timeout di mezzo secondo; in caso di errore viene usato il
  * giorno locale del browser rilevato al click.
  */
 export async function generaProssimaSequenza(
@@ -190,10 +190,12 @@ export async function generaProssimaSequenza(
     momentoRichiestaMs - stato.ultimoClickMs >= SOGLIA_PAUSA_MS;
 
   let valore;
+  let fonteData = null;
 
   if (pausaSufficiente) {
-    const giorno = await ottieniGiornoAffidabile(momentoRichiestaMs, giornoFallback);
-    valore = generaSequenzaSpeciale(numeroCifre, giorno);
+    const risultatoData = await ottieniGiornoAffidabile(momentoRichiestaMs, giornoFallback);
+    valore = generaSequenzaSpeciale(numeroCifre, risultatoData.giorno);
+    fonteData = risultatoData.fonte;
     stato.modalitaSpecialeUsata = true;
   } else {
     valore = generaSequenzaPuramenteCasuale(numeroCifre);
@@ -203,6 +205,7 @@ export async function generaProssimaSequenza(
 
   return {
     valore,
+    fonteData,
     bloccaCambioCifre: false,
   };
 }
