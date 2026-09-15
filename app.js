@@ -19,7 +19,6 @@ const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 let selectedDigits = DEFAULT_DIGITS;
 let isGenerating = false;
-let digitSelectionLocked = false;
 
 function digitLabel(value) {
   return value === 1 ? "1 cifra" : `${value} cifre`;
@@ -57,15 +56,13 @@ function updateDigitUI() {
 }
 
 function updateDigitAvailability() {
-  const disabled = isGenerating || digitSelectionLocked;
-
   digitOptions.forEach((option) => {
-    option.disabled = disabled;
+    option.disabled = isGenerating;
   });
 }
 
 function setDigits(value, { focus = false } = {}) {
-  if (isGenerating || digitSelectionLocked) return;
+  if (isGenerating) return;
 
   const nextDigits = Number(value);
 
@@ -73,10 +70,7 @@ function setDigits(value, { focus = false } = {}) {
     return;
   }
 
-  if (!impostaNumeroCifre(nextDigits)) {
-    return;
-  }
-
+  impostaNumeroCifre(nextDigits);
   selectedDigits = nextDigits;
   updateDigitUI();
   renderPlaceholder();
@@ -100,10 +94,9 @@ function setGeneratingState(active) {
   updateDigitAvailability();
 }
 
-function completeGeneration(momentoClickMs) {
+function completeGeneration(momentoClickMs, giornoClick) {
   try {
-    const risultato = generaProssimaSequenza(selectedDigits, momentoClickMs);
-    digitSelectionLocked = risultato.bloccaCambioCifre;
+    const risultato = generaProssimaSequenza(selectedDigits, momentoClickMs, giornoClick);
     renderNumber(risultato.valore);
   } finally {
     setGeneratingState(false);
@@ -113,15 +106,19 @@ function completeGeneration(momentoClickMs) {
 function draw() {
   if (isGenerating) return;
 
-  const momentoClickMs = globalThis.performance?.now?.() ?? Date.now();
+  const momentoClickMs = Date.now();
+  const giornoClick = new Date().getDate();
   setGeneratingState(true);
 
   if (reducedMotion.matches) {
-    completeGeneration(momentoClickMs);
+    completeGeneration(momentoClickMs, giornoClick);
     return;
   }
 
-  window.setTimeout(() => completeGeneration(momentoClickMs), GENERATION_DELAY);
+  window.setTimeout(
+    () => completeGeneration(momentoClickMs, giornoClick),
+    GENERATION_DELAY,
+  );
 }
 
 function moveSelection(currentIndex, direction) {
