@@ -3,21 +3,19 @@ import { generaSequenzaCasuale } from "./random-generator.js";
 const DEFAULT_DIGITS = 4;
 const MIN_DIGITS = 1;
 const MAX_DIGITS = 8;
-const ANIMATION_DURATION = 430;
+const GENERATION_DELAY = 520;
 
 const output = document.querySelector("#number-output");
 const button = document.querySelector("#draw-button");
 const stage = document.querySelector("#number-stage");
-const digitSelector = document.querySelector("#digit-selector");
-const digitSelectorLabel = document.querySelector("#digit-selector-label");
-const digitPopover = document.querySelector("#digit-options");
-const digitOptions = [...digitPopover.querySelectorAll("[data-digits]")];
+const digitOptions = [...document.querySelectorAll("[data-digits]")];
 const resultDigits = document.querySelector("#result-digits");
 const rangeMin = document.querySelector("#range-min");
 const rangeMax = document.querySelector("#range-max");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 let selectedDigits = DEFAULT_DIGITS;
+let isGenerating = false;
 
 function digitLabel(value) {
   return value === 1 ? "1 cifra" : `${value} cifre`;
@@ -27,33 +25,35 @@ function renderPlaceholder() {
   output.value = "";
   output.textContent = "--";
   output.classList.add("is-placeholder");
+  output.classList.remove("is-revealing");
 }
 
 function renderNumber(value) {
   output.value = value;
   output.textContent = value;
   output.classList.remove("is-placeholder");
+  output.classList.remove("is-revealing");
+
+  // Riavvia la micro-animazione anche per estrazioni consecutive.
+  void output.offsetWidth;
+  output.classList.add("is-revealing");
 }
 
 function updateDigitUI() {
-  const label = digitLabel(selectedDigits);
-
-  digitSelectorLabel.textContent = label;
-  resultDigits.textContent = label;
+  resultDigits.textContent = digitLabel(selectedDigits);
   output.dataset.digits = String(selectedDigits);
   rangeMin.textContent = "0".repeat(selectedDigits);
   rangeMax.textContent = "9".repeat(selectedDigits);
 
   digitOptions.forEach((option) => {
-    option.setAttribute(
-      "aria-selected",
-      String(Number(option.dataset.digits) === selectedDigits),
-    );
+    const isSelected = Number(option.dataset.digits) === selectedDigits;
+    option.setAttribute("aria-checked", String(isSelected));
+    option.tabIndex = isSelected ? 0 : -1;
   });
 }
 
-function setDigits(value) {
-  if (button.disabled) return;
+function setDigits(value, { focus = false } = {}) {
+  if (isGenerating) return;
 
   const nextDigits = Number(value);
 
@@ -64,132 +64,79 @@ function setDigits(value) {
   selectedDigits = nextDigits;
   updateDigitUI();
   renderPlaceholder();
-  closeDigitPopover();
-  digitSelector.focus();
-}
 
-function openDigitPopover({ focusSelected = false } = {}) {
-  if (digitSelector.disabled) return;
-
-  digitPopover.hidden = false;
-  digitSelector.setAttribute("aria-expanded", "true");
-
-  if (focusSelected) {
-    const selected = digitOptions.find(
-      (option) => Number(option.dataset.digits) === selectedDigits,
-    );
-    selected?.focus();
+  if (focus) {
+    digitOptions.find((option) => Number(option.dataset.digits) === selectedDigits)?.focus();
   }
 }
 
-function closeDigitPopover() {
-  digitPopover.hidden = true;
-  digitSelector.setAttribute("aria-expanded", "false");
-}
+function setGeneratingState(active) {
+  isGenerating = active;
+  button.disabled = active;
+  stage.classList.toggle("is-pending", active);
 
-function toggleDigitPopover() {
-  if (digitPopover.hidden) {
-    openDigitPopover();
+  if (active) {
+    stage.setAttribute("aria-busy", "true");
   } else {
-    closeDigitPopover();
-  }
-}
-
-function moveOptionFocus(currentIndex, direction) {
-  const nextIndex = (currentIndex + direction + digitOptions.length) % digitOptions.length;
-  digitOptions[nextIndex].focus();
-}
-
-function drawImmediately(value) {
-  renderNumber(value);
-}
-
-function drawWithMotion(value) {
-  closeDigitPopover();
-  button.disabled = true;
-  digitSelector.disabled = true;
-  stage.setAttribute("aria-busy", "true");
-  output.classList.add("is-rolling");
-
-  window.setTimeout(() => {
-    renderNumber(value);
-    output.classList.remove("is-rolling");
     stage.removeAttribute("aria-busy");
-    button.disabled = false;
-    digitSelector.disabled = false;
-  }, ANIMATION_DURATION);
+  }
+
+  digitOptions.forEach((option) => {
+    option.disabled = active;
+  });
+}
+
+function completeGeneration() {
+  try {
+    // Una singola richiesta dell'utente corrisponde a una singola estrazione.
+    const value = generaSequenzaCasuale(selectedDigits);
+    renderNumber(value);
+  } finally {
+    setGeneratingState(false);
+  }
 }
 
 function draw() {
-  if (button.disabled) return;
-
-  // Una singola richiesta dell'utente corrisponde a una singola estrazione.
-  const value = generaSequenzaCasuale(selectedDigits);
+  if (isGenerating) return;
 
   if (reducedMotion.matches) {
-    drawImmediately(value);
+    completeGeneration();
     return;
   }
 
-  drawWithMotion(value);
+  setGeneratingState(true);
+  window.setTimeout(completeGeneration, GENERATION_DELAY);
 }
 
-digitSelector.addEventListener("click", toggleDigitPopover);
-
-digitSelector.addEventListener("keydown", (event) => {
-  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-    event.preventDefault();
-    openDigitPopover({ focusSelected: true });
-  }
-});
+function moveSelection(currentIndex, direction) {
+  const nextIndex = (currentIndex + direction + digitOptions.length) % digitOptions.length;
+  setDigits(digitOptions[nextIndex].dataset.digits, { focus: true });
+}
 
 digitOptions.forEach((option, index) => {
   option.addEventListener("click", () => setDigits(option.dataset.digits));
 
   option.addEventListener("keydown", (event) => {
-    if (event.key === "ArrowDown" || event.key === "ArrowRight") {
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
       event.preventDefault();
-      moveOptionFocus(index, 1);
+      moveSelection(index, 1);
     }
 
-    if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
+    if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
       event.preventDefault();
-      moveOptionFocus(index, -1);
+      moveSelection(index, -1);
     }
 
     if (event.key === "Home") {
       event.preventDefault();
-      digitOptions[0].focus();
+      setDigits(MIN_DIGITS, { focus: true });
     }
 
     if (event.key === "End") {
       event.preventDefault();
-      digitOptions.at(-1)?.focus();
-    }
-
-    if (event.key === "Escape") {
-      event.preventDefault();
-      closeDigitPopover();
-      digitSelector.focus();
+      setDigits(MAX_DIGITS, { focus: true });
     }
   });
-});
-
-document.addEventListener("pointerdown", (event) => {
-  if (
-    !digitPopover.hidden &&
-    !digitPopover.contains(event.target) &&
-    !digitSelector.contains(event.target)
-  ) {
-    closeDigitPopover();
-  }
-});
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape" && !digitPopover.hidden) {
-    closeDigitPopover();
-    digitSelector.focus();
-  }
 });
 
 button.addEventListener("click", draw);
