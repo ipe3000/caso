@@ -86,164 +86,98 @@ h1 {
 }
 
 .digit-control {
-  position: relative;
-  width: fit-content;
-  margin-top: 14px;
-}
-
-.digit-selector {
-  min-height: 34px;
-  padding: 0 10px 0 12px;
-  border: 1px solid rgba(17, 24, 39, 0.1);
-  border-radius: 999px;
-  display: inline-flex;
+  margin-top: 16px;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.58);
-  font-size: 0.8rem;
-  font-weight: 680;
-  cursor: pointer;
-  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.05);
-  backdrop-filter: blur(10px);
-  transition:
-    border-color 160ms ease,
-    background-color 160ms ease,
-    transform 160ms ease;
+  gap: 10px;
 }
 
-.digit-selector svg {
-  width: 16px;
-  height: 16px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: transform 160ms ease;
+.digit-control__label {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.digit-selector[aria-expanded="true"] {
-  border-color: rgba(109, 94, 252, 0.24);
-  background: rgba(255, 255, 255, 0.82);
-}
-
-.digit-selector[aria-expanded="true"] svg {
-  transform: rotate(180deg);
-}
-
-.digit-selector:hover {
-  transform: translateY(-1px);
-}
-
-.digit-selector:focus-visible,
-.digit-popover button:focus-visible {
-  outline: 3px solid rgba(109, 94, 252, 0.2);
-  outline-offset: 3px;
-}
-
-.digit-popover {
-  position: absolute;
-  z-index: 10;
-  top: calc(100% + 8px);
-  left: 0;
-  width: max-content;
-  padding: 6px;
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: 16px;
+.digit-segments {
   display: grid;
-  grid-template-columns: repeat(4, 34px);
-  gap: 4px;
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
-  backdrop-filter: blur(18px);
+  grid-template-columns: repeat(8, 30px);
+  padding: 3px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(10px);
 }
 
-.digit-popover[hidden] {
-  display: none;
-}
-
-.digit-popover button {
-  width: 34px;
-  height: 34px;
+.digit-segments button {
+  width: 30px;
+  height: 30px;
   padding: 0;
   border: 0;
-  border-radius: 10px;
+  border-radius: 999px;
   color: var(--muted);
   background: transparent;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   font-weight: 700;
   cursor: pointer;
   transition:
-    color 140ms ease,
-    background-color 140ms ease,
-    transform 140ms ease;
+    color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
 }
 
-.digit-popover button:hover {
+.digit-segments button:hover:not(:disabled) {
   color: var(--ink);
-  background: rgba(109, 94, 252, 0.08);
 }
 
-.digit-popover button[aria-selected="true"] {
-  color: #ffffff;
-  background: var(--accent);
-  box-shadow: 0 5px 12px rgba(87, 70, 255, 0.2);
+.digit-segments button[aria-checked="true"] {
+  color: var(--accent-strong);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 5px rgba(15, 23, 42, 0.08);
 }
 
-.digit-popover button:active {
+.digit-segments button:active:not(:disabled) {
   transform: scale(0.94);
 }
 
+.digit-segments button:focus-visible {
+  outline: 3px solid rgba(109, 94, 252, 0.18);
+  outline-offset: 2px;
+}
+
+.digit-segments button:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
 .draw-button {
+  width: 156px;
+  min-height: 52px;
   margin-top: 18px;
-  min-height: 54px;
-  padding: 6px 6px 6px 18px;
+  padding: 0 22px;
   border: 1px solid rgba(109, 94, 252, 0.14);
   border-radius: 999px;
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: center;
   color: #ffffff;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
   font-size: 0.95rem;
   font-weight: 700;
+  text-align: center;
   cursor: pointer;
-  box-shadow: 0 12px 28px rgba(87, 70, 255, 0.24);
+  box-shadow: 0 12px 28px rgba(87, 70, 255, 0.22);
   transition:
     transform 180ms ease,
     box-shadow 180ms ease,
     filter 180ms ease;
 }
 
-.draw-button__label {
-  white-space: nowrap;
-}
-
-.draw-button__icon {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(6px);
-}
-
-.draw-button svg {
-  width: 19px;
-  height: 19px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
 .draw-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 16px 34px rgba(87, 70, 255, 0.3);
+  box-shadow: 0 16px 34px rgba(87, 70, 255, 0.28);
   filter: saturate(1.04);
 }
 
@@ -252,13 +186,13 @@ h1 {
 }
 
 .draw-button:focus-visible {
-  outline: 3px solid rgba(109, 94, 252, 0.28);
+  outline: 3px solid rgba(109, 94, 252, 0.24);
   outline-offset: 4px;
 }
 
 .draw-button:disabled {
   cursor: default;
-  opacity: 0.8;
+  opacity: 0.72;
 }
 
 .result-panel {
@@ -294,6 +228,7 @@ h1 {
 }
 
 .number-stage {
+  position: relative;
   display: grid;
   place-items: center;
   min-height: 172px;
@@ -301,6 +236,7 @@ h1 {
 }
 
 .number {
+  grid-area: 1 / 1;
   display: block;
   max-width: 100%;
   font-family: Georgia, "Times New Roman", serif;
@@ -312,6 +248,7 @@ h1 {
   white-space: nowrap;
   text-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
   transform-origin: center;
+  transition: opacity 160ms ease, transform 160ms ease;
 }
 
 .number.is-placeholder {
@@ -332,20 +269,73 @@ h1 {
   letter-spacing: -0.055em;
 }
 
-.number.is-rolling {
-  animation: number-pulse 110ms ease-in-out infinite alternate;
+.number.is-revealing {
+  animation: number-reveal 220ms ease-out both;
 }
 
-@keyframes number-pulse {
-  from {
-    transform: scale(0.97);
-    filter: blur(0.6px);
-    opacity: 0.74;
+.pending-indicator {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(2px);
+  transition: opacity 150ms ease;
+}
+
+.pending-indicator span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(248, 250, 252, 0.78);
+  transform: scale(0.72);
+}
+
+.number-stage.is-pending .number {
+  opacity: 0;
+  transform: scale(0.985);
+}
+
+.number-stage.is-pending .pending-indicator {
+  opacity: 1;
+}
+
+.number-stage.is-pending .pending-indicator span {
+  animation: pending-dot 760ms ease-in-out infinite;
+}
+
+.number-stage.is-pending .pending-indicator span:nth-child(2) {
+  animation-delay: 110ms;
+}
+
+.number-stage.is-pending .pending-indicator span:nth-child(3) {
+  animation-delay: 220ms;
+}
+
+@keyframes pending-dot {
+  0%,
+  70%,
+  100% {
+    opacity: 0.34;
+    transform: scale(0.72);
   }
-  to {
-    transform: scale(1.01);
-    filter: blur(0);
+
+  35% {
     opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes number-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(5px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -392,8 +382,19 @@ h1 {
     font-size: 0.95rem;
   }
 
-  .digit-selector {
-    min-height: 32px;
+  .digit-control {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .digit-segments {
+    width: min(100%, 304px);
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+
+  .digit-segments button {
+    width: 100%;
   }
 
   .result-panel {
