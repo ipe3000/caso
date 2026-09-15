@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#edf2f7" />
     <meta
       name="description"
-      content="Generatore di numeri casuali interi da 1 a 100."
+      content="Generatore di sequenze numeriche casuali da 1 a 8 cifre."
     />
     <title>Casuale — Numero casuale</title>
     <link rel="stylesheet" href="./styles.css" />
@@ -17,7 +17,40 @@
         <section class="intro" aria-labelledby="page-title">
           <p class="eyebrow">Generatore</p>
           <h1 id="page-title">Numero<br />casuale.</h1>
-          <p class="intro-copy">Estrai un intero da 1 a 100.</p>
+          <p class="intro-copy">Genera una sequenza numerica casuale.</p>
+
+          <div class="digit-control">
+            <button
+              class="digit-selector"
+              id="digit-selector"
+              type="button"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              aria-controls="digit-options"
+            >
+              <span id="digit-selector-label">4 cifre</span>
+              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                <path d="m6.5 8 3.5 3.5L13.5 8" />
+              </svg>
+            </button>
+
+            <div
+              class="digit-popover"
+              id="digit-options"
+              role="listbox"
+              aria-label="Numero di cifre"
+              hidden
+            >
+              <button type="button" role="option" data-digits="1" aria-selected="false">1</button>
+              <button type="button" role="option" data-digits="2" aria-selected="false">2</button>
+              <button type="button" role="option" data-digits="3" aria-selected="false">3</button>
+              <button type="button" role="option" data-digits="4" aria-selected="true">4</button>
+              <button type="button" role="option" data-digits="5" aria-selected="false">5</button>
+              <button type="button" role="option" data-digits="6" aria-selected="false">6</button>
+              <button type="button" role="option" data-digits="7" aria-selected="false">7</button>
+              <button type="button" role="option" data-digits="8" aria-selected="false">8</button>
+            </div>
+          </div>
 
           <button class="draw-button" id="draw-button" type="button">
             <span class="draw-button__label">Genera</span>
@@ -33,20 +66,22 @@
         <section class="result-panel" aria-labelledby="result-label">
           <div class="result-panel__topline">
             <p id="result-label">Risultato</p>
+            <span id="result-digits">4 cifre</span>
           </div>
 
           <div class="number-stage" id="number-stage">
             <output
-              class="number"
+              class="number is-placeholder"
               id="number-output"
+              data-digits="4"
               aria-live="polite"
               aria-atomic="true"
             >--</output>
           </div>
 
-          <div class="result-panel__footer">
-            <span>1</span>
-            <span>100</span>
+          <div class="result-panel__footer" aria-label="Intervallo possibile">
+            <span id="range-min">0000</span>
+            <span id="range-max">9999</span>
           </div>
         </section>
       </main>
