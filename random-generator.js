@@ -1,6 +1,6 @@
 const MIN_CIFRE = 1;
 const MAX_CIFRE = 8;
-const SOGLIA_PAUSA_MS = 10_000;
+const SOGLIA_PAUSA_MS = 5_000;
 const TIME_API_TIMEOUT_MS = 500;
 const TIME_API_URL =
   "https://timeapi.io/api/Time/current/zone?timeZone=Europe%2FRome";
@@ -165,7 +165,7 @@ export function impostaNumeroCifre(numeroCifre) {
 /**
  * Restituisce la prossima sequenza.
  *
- * Dopo almeno 10 secondi senza click, una sola volta per sessione, il risultato
+ * Dopo almeno 5 secondi senza click, una sola volta per sessione, il risultato
  * successivo e' deterministico. La data viene richiesta a TimeAPI per
  * Europe/Rome con timeout di mezzo secondo; in caso di errore viene usato il
  * giorno locale del browser rilevato al click.
