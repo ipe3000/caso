@@ -15,6 +15,7 @@ const digitOptions = [...document.querySelectorAll("[data-digits]")];
 const resultDigits = document.querySelector("#result-digits");
 const rangeMin = document.querySelector("#range-min");
 const rangeMax = document.querySelector("#range-max");
+const debugSource = document.querySelector("#debug-source");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
 let selectedDigits = DEFAULT_DIGITS;
@@ -40,6 +41,17 @@ function renderNumber(value) {
   // Riavvia la micro-animazione anche per estrazioni consecutive.
   void output.offsetWidth;
   output.classList.add("is-revealing");
+}
+
+function renderDebugSource(fonteData) {
+  if (!fonteData) {
+    debugSource.textContent = "";
+    debugSource.hidden = true;
+    return;
+  }
+
+  debugSource.textContent = `Data: ${fonteData}`;
+  debugSource.hidden = false;
 }
 
 function updateDigitUI() {
@@ -74,6 +86,7 @@ function setDigits(value, { focus = false } = {}) {
   selectedDigits = nextDigits;
   updateDigitUI();
   renderPlaceholder();
+  renderDebugSource(null);
 
   if (focus) {
     digitOptions.find((option) => Number(option.dataset.digits) === selectedDigits)?.focus();
@@ -102,6 +115,7 @@ async function completeGeneration(momentoClickMs, giornoFallback) {
       giornoFallback,
     );
     renderNumber(risultato.valore);
+    renderDebugSource(risultato.fonteData);
   } finally {
     setGeneratingState(false);
   }
@@ -162,3 +176,4 @@ impostaNumeroCifre(DEFAULT_DIGITS);
 updateDigitUI();
 updateDigitAvailability();
 renderPlaceholder();
+renderDebugSource(null);
