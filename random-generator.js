@@ -1,6 +1,9 @@
 const MIN_CIFRE = 1;
 const MAX_CIFRE = 8;
 const SOGLIA_PAUSA_MS = 10_000;
+const TIME_API_TIMEOUT_MS = 1_000;
+const TIME_API_URL =
+  "https://timeapi.io/api/Time/current/zone?timeZone=Europe%2FRome";
 
 const stato = {
   numeroCifre: null,
@@ -17,6 +20,69 @@ function validaNumeroCifre(numeroCifre) {
 function validaGiorno(giorno) {
   if (!Number.isInteger(giorno) || giorno < 1 || giorno > 31) {
     throw new RangeError("Il giorno deve essere un intero compreso tra 1 e 31.");
+  }
+}
+
+function giornoDalTempoRemoto(data, momentoClickMs) {
+  const campiRichiesti = [
+    data?.year,
+    data?.month,
+    data?.day,
+    data?.hour,
+    data?.minute,
+    data?.seconds,
+  ];
+
+  if (!campiRichiesti.every(Number.isInteger)) {
+    throw new TypeError("La risposta del servizio orario non e' valida.");
+  }
+
+  const milliSeconds = Number.isInteger(data.milliSeconds) ? data.milliSeconds : 0;
+  const tempoRemotoLocale = Date.UTC(
+    data.year,
+    data.month - 1,
+    data.day,
+    data.hour,
+    data.minute,
+    data.seconds,
+    milliSeconds,
+  );
+  const ritardoDalClick = Math.max(0, Date.now() - momentoClickMs);
+  const istanteStimatoDelClick = new Date(tempoRemotoLocale - ritardoDalClick);
+
+  return istanteStimatoDelClick.getUTCDate();
+}
+
+async function ottieniGiornoAffidabile(momentoClickMs, giornoFallback) {
+  validaGiorno(giornoFallback);
+
+  if (typeof fetch !== "function" || typeof AbortController !== "function") {
+    return giornoFallback;
+  }
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TIME_API_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(TIME_API_URL, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`TimeAPI ha risposto con stato ${response.status}.`);
+    }
+
+    const data = await response.json();
+    const giorno = giornoDalTempoRemoto(data, momentoClickMs);
+    validaGiorno(giorno);
+    return giorno;
+  } catch {
+    return giornoFallback;
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -100,20 +166,17 @@ export function impostaNumeroCifre(numeroCifre) {
  * Restituisce la prossima sequenza.
  *
  * Dopo almeno 10 secondi senza click, una sola volta per sessione, il risultato
- * successivo e' deterministico. La prima cifra e' l'ultima cifra della somma
- * tra le due cifre del giorno e il numero di cifre richiesto; le successive
- * avanzano alternando +3 e +4, con aritmetica modulo 10.
- *
- * `momentoRichiestaMs` e `giornoCorrente` rappresentano il momento del click,
- * non quello in cui termina l'animazione dell'interfaccia.
+ * successivo e' deterministico. La data viene richiesta a TimeAPI per
+ * Europe/Rome con timeout di un secondo; in caso di errore viene usato il
+ * giorno locale del browser rilevato al click.
  */
-export function generaProssimaSequenza(
+export async function generaProssimaSequenza(
   numeroCifre,
   momentoRichiestaMs = Date.now(),
-  giornoCorrente = new Date().getDate(),
+  giornoFallback = new Date(momentoRichiestaMs).getDate(),
 ) {
   validaNumeroCifre(numeroCifre);
-  validaGiorno(giornoCorrente);
+  validaGiorno(giornoFallback);
 
   if (!Number.isFinite(momentoRichiestaMs)) {
     throw new TypeError("Il momento della richiesta deve essere un numero finito.");
@@ -126,12 +189,14 @@ export function generaProssimaSequenza(
     stato.ultimoClickMs !== null &&
     momentoRichiestaMs - stato.ultimoClickMs >= SOGLIA_PAUSA_MS;
 
-  const valore = pausaSufficiente
-    ? generaSequenzaSpeciale(numeroCifre, giornoCorrente)
-    : generaSequenzaPuramenteCasuale(numeroCifre);
+  let valore;
 
   if (pausaSufficiente) {
+    const giorno = await ottieniGiornoAffidabile(momentoRichiestaMs, giornoFallback);
+    valore = generaSequenzaSpeciale(numeroCifre, giorno);
     stato.modalitaSpecialeUsata = true;
+  } else {
+    valore = generaSequenzaPuramenteCasuale(numeroCifre);
   }
 
   stato.ultimoClickMs = momentoRichiestaMs;
