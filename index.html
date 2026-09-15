@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f3efe7" />
+    <meta name="theme-color" content="#f4f1ea" />
     <meta
       name="description"
-      content="Genera istantaneamente un numero casuale intero da 1 a 100."
+      content="Generatore di numeri casuali interi da 1 a 100."
     />
-    <title>Casuale — Generatore di numeri</title>
+    <title>Casuale — Numero casuale</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -18,20 +18,17 @@
           <span class="brand-mark" aria-hidden="true"></span>
           <span>CASUALE</span>
         </a>
-        <span class="range-badge" aria-label="Intervallo da 1 a 100">01—100</span>
+        <span class="range-badge" aria-label="Intervallo da 1 a 100">1—100</span>
       </header>
 
       <main class="generator-layout">
         <section class="intro" aria-labelledby="page-title">
-          <p class="eyebrow">Generatore numerico</p>
-          <h1 id="page-title">Un numero.<br />Nessun pattern.</h1>
-          <p class="intro-copy">
-            Estrai un intero casuale tra 1 e 100. Il risultato viene generato
-            solo quando lo richiedi.
-          </p>
+          <p class="eyebrow">Generatore</p>
+          <h1 id="page-title">Numero<br />casuale.</h1>
+          <p class="intro-copy">Estrai un intero da 1 a 100.</p>
 
           <button class="draw-button" id="draw-button" type="button">
-            <span>Estrai un numero</span>
+            <span>Genera</span>
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M17 3h4v4" />
               <path d="M3 17.5 7.5 13l3.2 3.2L21 6" />
@@ -42,9 +39,8 @@
         </section>
 
         <section class="result-panel" aria-labelledby="result-label">
-          <div class="result-panel__grid" aria-hidden="true"></div>
           <div class="result-panel__topline">
-            <p id="result-label">Numero estratto</p>
+            <p id="result-label">Risultato</p>
             <span aria-hidden="true">●</span>
           </div>
 
@@ -58,15 +54,14 @@
           </div>
 
           <div class="result-panel__footer">
-            <span>Min 1</span>
-            <span>Max 100</span>
+            <span>1</span>
+            <span>100</span>
           </div>
         </section>
       </main>
 
       <footer class="site-footer">
         <p>Generazione locale nel browser.</p>
-        <p>Nessun dato viene inviato.</p>
       </footer>
     </div>
 
