@@ -32,6 +32,10 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 
+button {
+  font: inherit;
+}
+
 .page-shell {
   width: min(1040px, 100%);
   min-height: 100vh;
@@ -81,8 +85,118 @@ h1 {
   line-height: 1.5;
 }
 
+.digit-control {
+  position: relative;
+  width: fit-content;
+  margin-top: 14px;
+}
+
+.digit-selector {
+  min-height: 34px;
+  padding: 0 10px 0 12px;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.58);
+  font-size: 0.8rem;
+  font-weight: 680;
+  cursor: pointer;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.05);
+  backdrop-filter: blur(10px);
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.digit-selector svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 160ms ease;
+}
+
+.digit-selector[aria-expanded="true"] {
+  border-color: rgba(109, 94, 252, 0.24);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.digit-selector[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+
+.digit-selector:hover {
+  transform: translateY(-1px);
+}
+
+.digit-selector:focus-visible,
+.digit-popover button:focus-visible {
+  outline: 3px solid rgba(109, 94, 252, 0.2);
+  outline-offset: 3px;
+}
+
+.digit-popover {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 8px);
+  left: 0;
+  width: max-content;
+  padding: 6px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 16px;
+  display: grid;
+  grid-template-columns: repeat(4, 34px);
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.digit-popover[hidden] {
+  display: none;
+}
+
+.digit-popover button {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    color 140ms ease,
+    background-color 140ms ease,
+    transform 140ms ease;
+}
+
+.digit-popover button:hover {
+  color: var(--ink);
+  background: rgba(109, 94, 252, 0.08);
+}
+
+.digit-popover button[aria-selected="true"] {
+  color: #ffffff;
+  background: var(--accent);
+  box-shadow: 0 5px 12px rgba(87, 70, 255, 0.2);
+}
+
+.digit-popover button:active {
+  transform: scale(0.94);
+}
+
 .draw-button {
-  margin-top: 22px;
+  margin-top: 18px;
   min-height: 54px;
   padding: 6px 6px 6px 18px;
   border: 1px solid rgba(109, 94, 252, 0.14);
@@ -93,7 +207,6 @@ h1 {
   gap: 16px;
   color: #ffffff;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-strong) 100%);
-  font: inherit;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
@@ -166,8 +279,8 @@ h1 {
   align-items: center;
   justify-content: space-between;
   color: rgba(248, 250, 252, 0.68);
-  font-size: 0.75rem;
-  letter-spacing: 0.11em;
+  font-size: 0.72rem;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
@@ -175,22 +288,48 @@ h1 {
   margin: 0;
 }
 
+.result-panel__topline span {
+  color: rgba(248, 250, 252, 0.46);
+  font-variant-numeric: tabular-nums;
+}
+
 .number-stage {
   display: grid;
   place-items: center;
   min-height: 172px;
+  overflow: hidden;
 }
 
 .number {
   display: block;
+  max-width: 100%;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: clamp(6.6rem, 16vw, 12rem);
+  font-size: clamp(6.4rem, 14vw, 10rem);
   font-weight: 400;
   line-height: 0.82;
-  letter-spacing: -0.08em;
+  letter-spacing: -0.075em;
   font-variant-numeric: tabular-nums lining-nums;
+  white-space: nowrap;
   text-shadow: 0 8px 26px rgba(0, 0, 0, 0.2);
   transform-origin: center;
+}
+
+.number.is-placeholder {
+  color: rgba(248, 250, 252, 0.44);
+  font-size: clamp(6.4rem, 14vw, 10rem);
+  letter-spacing: -0.04em;
+  text-shadow: none;
+}
+
+.number:not(.is-placeholder)[data-digits="5"],
+.number:not(.is-placeholder)[data-digits="6"] {
+  font-size: clamp(4.6rem, 10vw, 7.2rem);
+}
+
+.number:not(.is-placeholder)[data-digits="7"],
+.number:not(.is-placeholder)[data-digits="8"] {
+  font-size: clamp(3.6rem, 7.5vw, 5.5rem);
+  letter-spacing: -0.055em;
 }
 
 .number.is-rolling {
@@ -253,6 +392,10 @@ h1 {
     font-size: 0.95rem;
   }
 
+  .digit-selector {
+    min-height: 32px;
+  }
+
   .result-panel {
     min-height: 278px;
     padding: 18px;
@@ -260,7 +403,21 @@ h1 {
   }
 
   .number {
-    font-size: clamp(6rem, 32vw, 8.6rem);
+    font-size: clamp(5.8rem, 29vw, 8.2rem);
+  }
+
+  .number.is-placeholder {
+    font-size: clamp(5.8rem, 29vw, 8.2rem);
+  }
+
+  .number:not(.is-placeholder)[data-digits="5"],
+  .number:not(.is-placeholder)[data-digits="6"] {
+    font-size: clamp(3.5rem, 17vw, 5.2rem);
+  }
+
+  .number:not(.is-placeholder)[data-digits="7"],
+  .number:not(.is-placeholder)[data-digits="8"] {
+    font-size: clamp(2.7rem, 12.8vw, 4rem);
   }
 }
 
