@@ -20,47 +20,24 @@
           <p class="intro-copy">Genera una sequenza numerica casuale.</p>
 
           <div class="digit-control">
-            <button
-              class="digit-selector"
-              id="digit-selector"
-              type="button"
-              aria-haspopup="listbox"
-              aria-expanded="false"
-              aria-controls="digit-options"
-            >
-              <span id="digit-selector-label">4 cifre</span>
-              <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-                <path d="m6.5 8 3.5 3.5L13.5 8" />
-              </svg>
-            </button>
-
+            <span class="digit-control__label" id="digit-control-label">Cifre</span>
             <div
-              class="digit-popover"
-              id="digit-options"
-              role="listbox"
-              aria-label="Numero di cifre"
-              hidden
+              class="digit-segments"
+              role="radiogroup"
+              aria-labelledby="digit-control-label"
             >
-              <button type="button" role="option" data-digits="1" aria-selected="false">1</button>
-              <button type="button" role="option" data-digits="2" aria-selected="false">2</button>
-              <button type="button" role="option" data-digits="3" aria-selected="false">3</button>
-              <button type="button" role="option" data-digits="4" aria-selected="true">4</button>
-              <button type="button" role="option" data-digits="5" aria-selected="false">5</button>
-              <button type="button" role="option" data-digits="6" aria-selected="false">6</button>
-              <button type="button" role="option" data-digits="7" aria-selected="false">7</button>
-              <button type="button" role="option" data-digits="8" aria-selected="false">8</button>
+              <button type="button" role="radio" data-digits="1" aria-checked="false" tabindex="-1">1</button>
+              <button type="button" role="radio" data-digits="2" aria-checked="false" tabindex="-1">2</button>
+              <button type="button" role="radio" data-digits="3" aria-checked="false" tabindex="-1">3</button>
+              <button type="button" role="radio" data-digits="4" aria-checked="true" tabindex="0">4</button>
+              <button type="button" role="radio" data-digits="5" aria-checked="false" tabindex="-1">5</button>
+              <button type="button" role="radio" data-digits="6" aria-checked="false" tabindex="-1">6</button>
+              <button type="button" role="radio" data-digits="7" aria-checked="false" tabindex="-1">7</button>
+              <button type="button" role="radio" data-digits="8" aria-checked="false" tabindex="-1">8</button>
             </div>
           </div>
 
-          <button class="draw-button" id="draw-button" type="button">
-            <span class="draw-button__label">Genera</span>
-            <span class="draw-button__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" focusable="false">
-                <path d="M7 12h10" />
-                <path d="m13 6 6 6-6 6" />
-              </svg>
-            </span>
-          </button>
+          <button class="draw-button" id="draw-button" type="button">Genera</button>
         </section>
 
         <section class="result-panel" aria-labelledby="result-label">
@@ -77,6 +54,12 @@
               aria-live="polite"
               aria-atomic="true"
             >--</output>
+
+            <div class="pending-indicator" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
           </div>
 
           <div class="result-panel__footer" aria-label="Intervallo possibile">
