@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#f4f1ea" />
+    <meta name="theme-color" content="#edf2f7" />
     <meta
       name="description"
       content="Generatore di numeri casuali interi da 1 a 100."
@@ -13,14 +13,6 @@
   </head>
   <body>
     <div class="page-shell">
-      <header class="site-header" aria-label="Intestazione">
-        <a class="brand" href="./" aria-label="Casuale, torna all'inizio">
-          <span class="brand-mark" aria-hidden="true"></span>
-          <span>CASUALE</span>
-        </a>
-        <span class="range-badge" aria-label="Intervallo da 1 a 100">1—100</span>
-      </header>
-
       <main class="generator-layout">
         <section class="intro" aria-labelledby="page-title">
           <p class="eyebrow">Generatore</p>
@@ -28,20 +20,19 @@
           <p class="intro-copy">Estrai un intero da 1 a 100.</p>
 
           <button class="draw-button" id="draw-button" type="button">
-            <span>Genera</span>
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M17 3h4v4" />
-              <path d="M3 17.5 7.5 13l3.2 3.2L21 6" />
-              <path d="M17 21h4v-4" />
-              <path d="m3 6.5 4.5 4.5 1.6-1.6" />
-            </svg>
+            <span class="draw-button__label">Genera</span>
+            <span class="draw-button__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M7 12h10" />
+                <path d="m13 6 6 6-6 6" />
+              </svg>
+            </span>
           </button>
         </section>
 
         <section class="result-panel" aria-labelledby="result-label">
           <div class="result-panel__topline">
             <p id="result-label">Risultato</p>
-            <span aria-hidden="true">●</span>
           </div>
 
           <div class="number-stage" id="number-stage">
