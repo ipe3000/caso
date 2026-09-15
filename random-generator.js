@@ -1,9 +1,10 @@
+const MIN_CIFRE = 1;
+const MAX_CIFRE = 8;
+
 /**
  * Restituisce un intero casuale compreso tra min e max, estremi inclusi.
- *
- * Questo modulo e' volutamente indipendente dall'interfaccia: non accede al DOM,
- * non gestisce animazioni e non contiene stato grafico. Le future modifiche
- * all'algoritmo di estrazione possono quindi essere isolate in questo file.
+ * Usa crypto.getRandomValues() quando disponibile e rejection sampling
+ * per evitare bias da modulo.
  */
 export function generaNumeroCasuale(min, max) {
   if (!Number.isSafeInteger(min) || !Number.isSafeInteger(max)) {
@@ -35,4 +36,21 @@ export function generaNumeroCasuale(min, max) {
   }
 
   return min + Math.floor(Math.random() * ampiezza);
+}
+
+/**
+ * Genera una sequenza numerica casuale a lunghezza fissa.
+ * Gli zeri iniziali sono significativi: con 4 cifre, "0042" e' valido.
+ *
+ * Il modulo resta indipendente dal DOM e dall'interfaccia.
+ */
+export function generaSequenzaCasuale(numeroCifre) {
+  if (!Number.isInteger(numeroCifre) || numeroCifre < MIN_CIFRE || numeroCifre > MAX_CIFRE) {
+    throw new RangeError(`Il numero di cifre deve essere compreso tra ${MIN_CIFRE} e ${MAX_CIFRE}.`);
+  }
+
+  const ampiezza = 10 ** numeroCifre;
+  const valore = generaNumeroCasuale(0, ampiezza - 1);
+
+  return String(valore).padStart(numeroCifre, "0");
 }
